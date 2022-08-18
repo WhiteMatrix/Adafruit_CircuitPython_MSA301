@@ -39,6 +39,7 @@ from adafruit_register.i2c_bits import RWBits
 import adafruit_bus_device.i2c_device as i2cdevice
 
 _MSA301_I2CADDR_DEFAULT = const(0x26)
+_MSA311_I2CADDR_DEFAULT = const(0x62)
 
 _MSA301_REG_PARTID = const(0x01)
 _MSA301_REG_OUT_X_L = const(0x02)
@@ -368,3 +369,22 @@ class MSA301:  # pylint: disable=too-many-instance-attributes
             return True
 
         return False
+
+
+class MSA311(MSA301):
+    """
+    Overriden __init__ method with a diffrent I2C address to support MSA311
+    """
+    def __init__(self, i2c_bus):
+        self.i2c_device = i2cdevice.I2CDevice(i2c_bus, _MSA311_I2CADDR_DEFAULT)
+
+        if self._part_id != 0x13:
+            raise AttributeError("Cannot find a MSA311")
+
+        self._disable_x = self._disable_y = self._disable_z = False
+        self.power_mode = Mode.NORMAL
+        self.data_rate = DataRate.RATE_500_HZ
+        self.bandwidth = BandWidth.WIDTH_250_HZ
+        self.range = Range.RANGE_4_G
+        self.resolution = Resolution.RESOLUTION_14_BIT
+        self._tap_count = 0
