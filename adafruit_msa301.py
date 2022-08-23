@@ -63,6 +63,21 @@ _MSA301_REG_TAPTH = const(0x2B)
 
 _STANDARD_GRAVITY = 9.806
 
+""" Shared __init__ implementation """
+def commonInit(self, i2c_bus, i2c_addr):
+    self.i2c_device = i2cdevice.I2CDevice(i2c_bus, i2c_addr)
+
+    if self._part_id != 0x13:
+        raise AttributeError("Cannot find a MSA3x1")
+
+        self._disable_x = self._disable_y = self._disable_z = False
+        self.power_mode = Mode.NORMAL
+        self.data_rate = DataRate.RATE_500_HZ
+        self.bandwidth = BandWidth.WIDTH_250_HZ
+        self.range = Range.RANGE_4_G
+        self.resolution = Resolution.RESOLUTION_14_BIT
+        self._tap_count = 0
+
 
 class Mode:  # pylint: disable=too-few-public-methods
     """An enum-like class representing the different modes that the MSA301 can
@@ -235,18 +250,7 @@ class MSA301:  # pylint: disable=too-many-instance-attributes
     _part_id = ROUnaryStruct(_MSA301_REG_PARTID, "<B")
 
     def __init__(self, i2c_bus):
-        self.i2c_device = i2cdevice.I2CDevice(i2c_bus, _MSA301_I2CADDR_DEFAULT)
-
-        if self._part_id != 0x13:
-            raise AttributeError("Cannot find a MSA301")
-
-        self._disable_x = self._disable_y = self._disable_z = False
-        self.power_mode = Mode.NORMAL
-        self.data_rate = DataRate.RATE_500_HZ
-        self.bandwidth = BandWidth.WIDTH_250_HZ
-        self.range = Range.RANGE_4_G
-        self.resolution = Resolution.RESOLUTION_14_BIT
-        self._tap_count = 0
+        commonInit(self, i2c_bus, _MSA301_I2CADDR_DEFAULT)
 
     _disable_x = RWBit(_MSA301_REG_ODR, 7)
     _disable_y = RWBit(_MSA301_REG_ODR, 6)
@@ -376,15 +380,4 @@ class MSA311(MSA301):
     Overriden __init__ method with a diffrent I2C address to support MSA311
     """
     def __init__(self, i2c_bus):
-        self.i2c_device = i2cdevice.I2CDevice(i2c_bus, _MSA311_I2CADDR_DEFAULT)
-
-        if self._part_id != 0x13:
-            raise AttributeError("Cannot find a MSA311")
-
-        self._disable_x = self._disable_y = self._disable_z = False
-        self.power_mode = Mode.NORMAL
-        self.data_rate = DataRate.RATE_500_HZ
-        self.bandwidth = BandWidth.WIDTH_250_HZ
-        self.range = Range.RANGE_4_G
-        self.resolution = Resolution.RESOLUTION_14_BIT
-        self._tap_count = 0
+        commonInit(self, i2c_bus, _MSA311_I2CADDR_DEFAULT)
